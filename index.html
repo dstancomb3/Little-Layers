@@ -18,7 +18,7 @@
 <button data-kind="hill">＋ Hills</button><button data-kind="mountain">＋ Mountains</button><button data-kind="forest">＋ Forest</button><button data-kind="waves">＋ Waves</button><button data-kind="cloud">＋ Clouds</button><button data-kind="stars">＋ Stars</button><button data-kind="fog">＋ Fog</button>
 </div>
 <p class="tip">Tap a layer to select, then drag it to reposition. Adjust its depth and color, or move it forward and backward.</p>
-<div class="row"><label>Theme <select id="theme"><option value="sunset">Sunset</option><option value="twilight">Twilight</option><option value="daybreak">Daybreak</option><option value="sea">Sea Glass</option></select></label><label>Depth <input id="depth" type="range" min="0" max="10" value="5"></label><label>Layer size <input id="layer-size" type="range" min="55" max="155" value="100"><output id="layer-size-value">100%</output></label><label>Height <input id="layer-height" type="range" min="-180" max="150" value="0"><output id="layer-height-value">0</output></label><label>Light direction <input id="light-angle" type="range" min="-90" max="90" value="35"></label><label>Shadow distance <input id="shadow-distance" type="range" min="0" max="18" value="7"></label><label>Color <input id="color" type="color" value="#638a85"></label><label>Variation <select id="variation"><option value="0">Classic</option><option value="1">Detailed</option><option value="2">Wild</option><option value="3">Soft</option></select></label><label>Gradient <select id="gradient"><option value="flat">Solid</option><option value="darkLight">Dark → light</option><option value="lightDark">Light → dark</option></select></label><label>Edge <select id="edge"><option value="cut">Clean cut</option><option value="torn">Torn paper</option><option value="deckle">Deckled</option></select></label><label>Texture <select id="texture"><option value="card">Cardstock</option><option value="fiber">Handmade fibers</option><option value="grain">Fine grain</option><option value="none">None</option></select></label></div>
+<div class="row"><label>Theme <select id="theme"><option value="sunset">Sunset</option><option value="twilight">Twilight</option><option value="daybreak">Daybreak</option><option value="sea">Sea Glass</option></select></label><label>Depth <input id="depth" type="range" min="0" max="10" value="5"></label><label>Layer size <input id="layer-size" type="range" min="55" max="155" value="100"><output id="layer-size-value">100%</output></label><label>Height <input id="layer-height" type="range" min="-180" max="150" value="0"><output id="layer-height-value">0</output></label><label>Light direction <input id="light-angle" type="range" min="-90" max="90" value="35"></label><label>Shadow distance <input id="shadow-distance" type="range" min="0" max="18" value="7"></label><label>Color <input id="color" type="color" value="#638a85"></label><label>Variation <select id="variation"><option value="0">Classic</option><option value="1">Detailed</option><option value="2">Wild</option><option value="3">Soft</option></select></label><label>Gradient <select id="gradient"><option value="flat">Solid</option><option value="darkLight">Dark → light</option><option value="lightDark">Light → dark</option></select></label><label>Edge <select id="edge"><option value="cut">Clean cut</option><option value="torn">Torn paper</option><option value="deckle">Handmade deckle (soft fibers)</option></select></label><label>Texture <select id="texture"><option value="card">Cardstock</option><option value="fiber">Handmade fibers</option><option value="grain">Fine grain</option><option value="none">None</option></select></label></div>
 <div class="actions"><button id="back">Send back</button><button id="forward">Bring forward</button><button id="remove">Remove</button><button id="undo">Undo</button><button id="reset">New scene</button><button id="motion" aria-pressed="false">▶ Motion</button></div>
 <div id="toast" role="status"></div><div class="muted">Your scene saves automatically on this device. Export PNG for sharing. No account or AI required.</div>
 </div></main>
@@ -75,6 +75,53 @@ if(kind==='waves'){const a=[13,23,35,7][v];p(`M-30 370 Q20 ${370-a} 72 370 T175 
 if(kind==='cloud'){const count=[3,4,3,5][v];for(let i=0;i<count;i++){const x=48+i*(305/Math.max(1,count-1)),y=92+(i%2)*62,scale=v===2?1.35:1;const cloud=el('g',{transform:`translate(${x} ${y}) scale(${scale})`},g);const d='M-54 18 C-73 12 -65 -12 -43 -16 C-41 -37 -15 -43 0 -29 C15 -52 45 -35 47 -17 C72 -18 80 8 59 19 Q0 31 -54 18Z';cloud.appendChild(path(d,c));cloud.appendChild(el('path',{d:'M-35 10 Q-19 14 -7 7 M6 -20 Q18 -29 29 -16',stroke:shade(item.color,24),'stroke-width':2.5,'stroke-linecap':'round',fill:'none',opacity:.6}))}}
 if(kind==='stars'){const count=[24,46,17,67][v];for(let i=0;i<count;i++){const x=10+(i*113+i*i*7)%390,y=15+(i*67+i*i*3)%270,r=v===2?3.5:1.4+(i%3);if(i%4===0)p(`M${x} ${y-r*2}L${x+r*.35} ${y-r*.35}L${x+r*2} ${y}L${x+r*.35} ${y+r*.35}L${x} ${y+r*2}L${x-r*.35} ${y+r*.35}L${x-r*2} ${y}L${x-r*.35} ${y-r*.35}Z`);else g.appendChild(el('circle',{cx:x,cy:y,r,fill:c}))}}
 if(kind==='fog'){const stripes=[3,5,7,4][v];for(let i=0;i<stripes;i++){const y=160+i*(v===2?45:63),h=26+(i%3)*12;const d=`M-45 ${y}Q30 ${y-h} 100 ${y} T245 ${y} T430 ${y}L430 ${y+h}Q330 ${y+h+12} 235 ${y+h} T30 ${y+h}L-45 ${y+h}Z`;g.appendChild(el('path',{d,fill:c,opacity: v===3?.15:.3+(i%3)*.07}))}}}
+function roughPaperEdges(paper,item,index){
+ const edge=item.edge||'cut';if(edge==='cut')return;
+ const random=seeded((Number(item.seed)||8111)+index*97+(edge==='torn'?19:37));
+ const paths=Array.from(paper.querySelectorAll('path')).filter(n=>n.getAttribute('fill')&&n.getAttribute('fill')!=='none');
+ // Replace primary filled outlines with an irregular silhouette, not a dotted border.
+ // Keep complexity bounded so touch dragging stays responsive on phones.
+ for(const original of paths.slice(0,edge==='torn'?18:24)){
+  if(typeof original.getTotalLength!=='function')continue;
+  let length;try{length=original.getTotalLength()}catch(e){continue}
+  if(!Number.isFinite(length)||length<65)continue;
+  const step=edge==='torn'?7:4.5;
+  const n=Math.min(280,Math.max(20,Math.round(length/step)));
+  let points=[];for(let j=0;j<n;j++){const p=original.getPointAtLength(length*j/n);points.push([p.x,p.y])}
+  if(points.length<3)continue;
+  const amplitude=edge==='torn'?2.6:1.1;
+  const jitters=points.map(()=>((random()+random())-1)*amplitude);
+  const d=points.map(([x,y],j)=>{
+   const prev=points[(j+n-1)%n],next=points[(j+1)%n],dx=next[0]-prev[0],dy=next[1]-prev[1],mag=Math.hypot(dx,dy)||1;
+   const jitter=jitters[j]*.70+jitters[(j+n-1)%n]*.15+jitters[(j+1)%n]*.15;
+   return (j?'L':'M')+(x-dy/mag*jitter).toFixed(2)+' '+(y+dx/mag*jitter).toFixed(2)
+  }).join(' ')+'Z';
+  original.setAttribute('d',d);
+ }
+}
+function applyPaperTexture(paper,item,index){
+ const tex=item.texture||'card';if(tex==='none'||item.kind==='fog')return;
+ const defs=svg.querySelector('defs'),clipId='paper-clip-'+index,clip=el('clipPath',{id:clipId,clipPathUnits:'userSpaceOnUse'},defs);
+ // Copy only the paper silhouettes, excluding any decorative strokes and overlays.
+ Array.from(paper.querySelectorAll('path,circle,ellipse')).filter(n=>n.getAttribute('fill')&&n.getAttribute('fill')!=='none').forEach(shape=>{
+  const copy=shape.cloneNode(false);copy.setAttribute('fill','white');copy.removeAttribute('stroke');
+  let transform=shape.parentElement;
+  if(transform!==paper){const parent=shape.parentElement;if(parent?.getAttribute('transform')){const g=el('g',{transform:parent.getAttribute('transform')},clip);g.appendChild(copy)}else clip.appendChild(copy)}
+  else clip.appendChild(copy);
+ });
+ const overlay=el('g',{'clip-path':'url(#'+clipId+')','pointer-events':'none'},paper);
+ const rng=seeded((Number(item.seed)||5309)+index*103),amount=tex==='fiber'?155:tex==='grain'?250:105;
+ for(let i=0;i<amount;i++){
+  const x=-270+rng()*950,y=-35+rng()*580;
+  if(tex==='fiber'){el('path',{d:`M${x.toFixed(1)} ${y.toFixed(1)} l${(2+rng()*7).toFixed(1)} ${(rng()*2-1).toFixed(1)}`,stroke:i%3===0?'#1b2137':'#ffffff','stroke-width':(.24+rng()*.48).toFixed(2),opacity:'.26'},overlay)}
+  else{el('circle',{cx:x.toFixed(1),cy:y.toFixed(1),r:(tex==='grain'?.3+rng()*.75:.6+rng()*1.05).toFixed(2),fill:i%3===0?'#212638':'#ffffff',opacity:tex==='grain'?'.22':'.13'},overlay)}
+ }
+ if((item.edge||'cut')!=='cut'){
+  const r=seeded((Number(item.seed)||1289)+index*13);
+  // Occasional visible exposed fibers near the top of the main sheet.
+  for(let i=0;i<45;i++){const x=-240+r()*900,y=280+r()*155;el('path',{d:`M${x.toFixed(1)} ${y.toFixed(1)}l${(r()*3-1.5).toFixed(1)} ${(-1-r()*3).toFixed(1)}`,stroke:'#fff2dd','stroke-width':'.5',opacity:'.3'},overlay)}
+ }
+}
 function geometry(item,index){
  const group=el('g',{'data-index':index,style:'cursor:grab'}),depth=Number(item.depth)||0,offset=(10-depth)*2;
  // Extend the source horizontally, but preserve its vertical proportions.
@@ -92,20 +139,9 @@ function geometry(item,index){
  if(item.kind!=='fog'){
   paper.setAttribute('data-edge',item.edge||'cut');
   paper.setAttribute('data-texture',item.texture||'card');
-  // All materials are normal SVG shapes, never a turbulence/filter chain.
-  // Clip paper grain and subtle edge ink to the actual layer silhouette.
-  const tex=item.texture||'card',edge=item.edge||'cut';
-  if(tex!=='none'){
-   const clipId='paper-clip-'+index,clip=el('clipPath',{id:clipId,clipPathUnits:'userSpaceOnUse'});
-   Array.from(paper.children).forEach(child=>{const copy=child.cloneNode(true);copy.removeAttribute('stroke');copy.removeAttribute('stroke-width');copy.setAttribute('fill','#fff');clip.appendChild(copy)});
-   svg.querySelector('defs').appendChild(clip);
-   const patternId='grain-'+tex,overlay=el('rect',{x:-100,y:-100,width:600,height:800,fill:'url(#'+patternId+')','clip-path':'url(#'+clipId+')','pointer-events':'none'},paper);
-   overlay.setAttribute('opacity',tex==='fiber'?.45:tex==='grain'?.25:.15);
-  }
-  if(edge!=='cut'){
-   const paths=Array.from(paper.querySelectorAll('path')).filter(n=>n.getAttribute('fill')!=='none');
-   paths.forEach(pathNode=>{const contour=pathNode.cloneNode(false);contour.setAttribute('fill','none');contour.setAttribute('stroke',shade(item.color,edge==='torn'?46:25));contour.setAttribute('stroke-width',edge==='torn'?2.6:1.6);contour.setAttribute('stroke-dasharray',edge==='torn'?'1 3':'3 5');contour.setAttribute('opacity','.55');contour.setAttribute('pointer-events','none');paper.appendChild(contour)})
-  }
+  // Keep the source geometry visible. All paper details use ordinary SVG shapes.
+  roughPaperEdges(paper,item,index);
+  applyPaperTexture(paper,item,index);
   // Offset a dark duplicate instead of using device-sensitive SVG filters.
   const shadow=paper.cloneNode(true),angle=(Number(state.lightAngle)||0)*Math.PI/180,distance=Math.max(0,Number(state.shadowDistance)||0)*(0.35+depth*.095);
   shadow.setAttribute('transform','translate('+(Math.sin(angle)*distance)+' '+(Math.cos(angle)*distance)+')');
@@ -118,30 +154,6 @@ function geometry(item,index){
  group.addEventListener('click',()=>{selected=index;sync();render()});return group
 }
 function render(){svg.replaceChildren();const colors=schemes[state.theme];const defs=el('defs'),grad=el('linearGradient',{id:'sky',x1:'0',y1:'0',x2:'0',y2:'1'});grad.append(el('stop',{offset:'0%','stop-color':colors[0]}),el('stop',{offset:'100%','stop-color':colors[1]}));defs.appendChild(grad);const shadow=el('filter',{id:'shadow',x:'-20%',y:'-20%',width:'140%',height:'140%'});shadow.appendChild(el('feDropShadow',{dx:0,dy:4,stdDeviation:4,'flood-color':'#101429','flood-opacity':'.48'}));defs.appendChild(shadow);
-for(const [name,step] of [['card',19],['fiber',11],['grain',7]]){
- const pattern=el('pattern',{id:'grain-'+name,patternUnits:'userSpaceOnUse',width:step,height:step},defs);
- if(name==='fiber'){el('path',{d:'M0 6 l7 -3 M4 10 l5 -2',stroke:'#ffffff','stroke-width':'.8',opacity:'.55'},pattern)}
- else{el('circle',{cx:step*.28,cy:step*.4,r:name==='grain'?.8:1.2,fill:'#fff',opacity:'.52'},pattern);el('circle',{cx:step*.68,cy:step*.76,r:'.7',fill:'#101527',opacity:'.4'},pattern)}
-}
-// Shared procedural paper surfaces and edge distortions. Fog deliberately stays untextured.
-for(const edge of ['cut','torn','deckle'])for(const texture of ['card','fiber','grain','none']){
- const filter=el('filter',{id:'paper-'+edge+'-'+texture,x:'-12%',y:'-12%',width:'124%',height:'124%','color-interpolation-filters':'sRGB'});
- if(edge!=='cut'){
-  filter.appendChild(el('feTurbulence',{type:'fractalNoise',baseFrequency:edge==='torn'?'0.055':'0.023',numOctaves:2,seed:7,result:'roughness'}));
-  filter.appendChild(el('feDisplacementMap',{in:'SourceGraphic',in2:'roughness',scale:edge==='torn'?5:2.5,xChannelSelector:'R',yChannelSelector:'G',result:'edged'}));
- }
- const source=edge==='cut'?'SourceGraphic':'edged';
- if(texture==='none'){filter.appendChild(el('feMerge',{},filter)).appendChild(el('feMergeNode',{in:source}));}
- else{
-  const density={card:0.34,fiber:0.09,grain:0.67}[texture];
-  filter.appendChild(el('feTurbulence',{type:'fractalNoise',baseFrequency:density,numOctaves:texture==='fiber'?3:2,seed:11,result:'textureNoise'}));
-  filter.appendChild(el('feColorMatrix',{in:'textureNoise',type:'saturate',values:0,result:'grayNoise'}));
-  // Restrict texture to the actual paper silhouettes, preserving transparency.
-  filter.appendChild(el('feComposite',{in:'grayNoise',in2:source,operator:'in',result:'maskedGrain'}));
-  filter.appendChild(el('feBlend',{in:source,in2:'maskedGrain',mode:'soft-light',result:'paperResult'}));const end=el('feMerge',{},filter);end.appendChild(el('feMergeNode',{in:'paperResult'}));
- }
- defs.appendChild(filter);
-}
 state.layers.forEach((l,i)=>{if(!l.gradient||l.gradient==='flat')return;const gradient=el('linearGradient',{id:'layergrad'+i,x1:0,y1:0,x2:0,y2:1});const reverse=l.gradient==='lightDark';gradient.append(el('stop',{offset:'0%','stop-color':shade(l.color,reverse?48:-48)}),el('stop',{offset:'100%','stop-color':shade(l.color,reverse?-48:48)}));defs.appendChild(gradient)});svg.appendChild(defs);svg.appendChild(el('rect',{width:400,height:500,fill:'url(#sky)'}));svg.appendChild(el('circle',{cx:300,cy:110,r:47,fill:'#ffebcb',opacity:.65}));state.layers.forEach((l,i)=>svg.appendChild(geometry(l,i)))}
 function sync(){let item=state.layers[selected];document.getElementById('depth').disabled=!item;document.getElementById('color').disabled=!item;if(item){document.getElementById('depth').value=item.depth;document.getElementById('color').value=item.color}document.getElementById('variation').disabled=!item;document.getElementById('gradient').disabled=!item;if(item){document.getElementById('variation').value=String(item.variation||0);document.getElementById('gradient').value=item.gradient||'flat'}for(const field of ['edge','texture']){document.getElementById(field).disabled=!item;document.getElementById(field).value=item?(item[field]||(field==='edge'?'cut':'card')):(field==='edge'?'cut':'card')}document.getElementById('light-angle').value=state.lightAngle??35;document.getElementById('shadow-distance').value=state.shadowDistance??7;document.getElementById('layer-size').disabled=!item;document.getElementById('layer-height').disabled=!item;document.getElementById('layer-size').value=item?.size||100;document.getElementById('layer-size-value').textContent=(item?.size||100)+'%';document.getElementById('layer-height').value=item?.height||0;document.getElementById('layer-height-value').textContent=String(item?.height||0);document.getElementById('theme').value=state.theme;notify(item?'Selected '+item.kind:'Tap a shape to edit it')}
 document.querySelectorAll('[data-kind]').forEach(b=>b.onclick=()=>{snapshot();const palette=schemes[state.theme],kind=b.dataset.kind,prior=state.layers.filter(l=>l.kind===kind).length;state.layers.push({kind,color:palette[Math.min(2+state.layers.length%3,4)],depth:5,variation:prior%4,size:100,height:0,seed:Math.floor(Math.random()*0x7fffffff)+1,gradient:'darkLight',edge:'cut',texture:'card'});selected=state.layers.length-1;save();sync();render()});
