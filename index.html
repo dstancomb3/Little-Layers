@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#182535"><title>Little Layers</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#152535;color:#f6f1e8;font-family:system-ui,Arial,sans-serif}button,input,select{font:inherit}button{border:1px solid #ffffff35;border-radius:12px;background:#34465b;color:#fff;padding:10px 12px;cursor:pointer}button:active{transform:scale(.97)}button.selected{background:#8a667a;border-color:#ffd9b4}header{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:14px 15px}h1{font-size:20px;margin:0}header small{color:#c4cbd4}main{max-width:780px;margin:auto;padding:0 12px 30px}.scene{position:relative;background:linear-gradient(140deg,#f4d5bd,#a7b5c7);border:12px solid #d7b08d;border-bottom-color:#916746;border-right-color:#ad805b;box-shadow:inset 0 0 25px #362b3977,0 16px 45px #070f1780;border-radius:20px;overflow:hidden;aspect-ratio:4/5;max-height:69dvh;min-height:300px;touch-action:pan-y}.scene svg{width:100%;height:100%;display:block;filter:drop-shadow(0 4px 3px #14243335)}.panel{background:#23384c;border:1px solid #ffffff29;border-radius:18px;padding:12px;margin:12px 0}.toolbar{display:flex;gap:7px;flex-wrap:wrap}.toolbar button{flex:1 1 auto;font-size:13px}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.row label{font-size:13px;display:flex;gap:8px;align-items:center}.row input{accent-color:#edae94}.row select{background:#34465b;color:#fff;border:1px solid #ffffff55;border-radius:8px;padding:8px}.muted{font-size:12px;color:#c3cad4}.tip{font-size:12px;color:#e6d1be;margin:8px 2px}.actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}#toast{min-height:20px;color:#ffdbb8;font-size:12px}button:focus-visible{outline:2px solid #fff}@media(max-width:390px){.scene{min-height:320px}.toolbar button{padding:9px 7px}}
+</style></head><body>
+<header><div><h1>Little Layers</h1><small>Make a tiny world, one layer at a time</small></div><button id="export">Save PNG</button></header>
+<main>
+<div class="scene"><svg id="art" viewBox="0 0 400 500" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Layered paper diorama"></svg></div>
+<div class="panel">
+<div class="toolbar" aria-label="Add a paper layer">
+<button data-kind="hill">＋ Hills</button><button data-kind="mountain">＋ Mountains</button><button data-kind="forest">＋ Forest</button><button data-kind="waves">＋ Waves</button><button data-kind="cloud">＋ Clouds</button><button data-kind="stars">＋ Stars</button>
+</div>
+<p class="tip">Tap a layer in the scene to select it. Adjust its depth and color, or move it forward and backward.</p>
+<div class="row"><label>Theme <select id="theme"><option value="sunset">Sunset</option><option value="twilight">Twilight</option><option value="daybreak">Daybreak</option><option value="sea">Sea Glass</option></select></label><label>Depth <input id="depth" type="range" min="0" max="10" value="5"></label><label>Color <input id="color" type="color" value="#638a85"></label></div>
+<div class="actions"><button id="back">Send back</button><button id="forward">Bring forward</button><button id="remove">Remove</button><button id="undo">Undo</button><button id="reset">New scene</button></div>
+<div id="toast" role="status"></div><div class="muted">Your scene saves automatically on this device. Export PNG for sharing. No account or AI required.</div>
+</div></main>
+<script>
+(()=>{
+const svg=document.getElementById('art'),ns='http://www.w3.org/2000/svg',storage='little-layers-v1';
+const schemes={sunset:['#fbddc0','#ecafab','#8e849e','#597d87','#2e5864'],twilight:['#1b2745','#34355c','#5d5680','#6b6483','#293b54'],daybreak:['#c7e4ec','#e6c7a6','#98b4a2','#618c92','#396d6c'],sea:['#e2f0dc','#b9d6c9','#83b7b6','#5f929e','#366877']};
+let state={theme:'sunset',layers:[]},selected=-1,history=[];
+function notify(t){document.getElementById('toast').textContent=t}
+function save(){try{localStorage.setItem(storage,JSON.stringify(state))}catch(e){notify('Storage unavailable; export PNG to keep your art.')}}
+function snapshot(){history.push(JSON.stringify(state));if(history.length>30)history.shift()}
+function el(tag,props={}){const e=document.createElementNS(ns,tag);for(const [k,v]of Object.entries(props))e.setAttribute(k,String(v));return e}
+function path(d,fill){return el('path',{d,fill})}
+function geometry(item,index){const group=el('g',{'data-index':index,style:'cursor:pointer'}),c=item.color,depth=item.depth,offset=(10-depth)*2;
+const p=(d,fill=c)=>group.appendChild(path(d,fill));
+if(item.kind==='hill')p('M-15 420 Q65 320 150 390 Q275 278 415 378 L415 520 L-15 520Z');
+if(item.kind==='mountain')p('M-30 428 L95 245 L165 345 L244 216 L424 420 L424 530 L-30 530Z');
+if(item.kind==='forest'){p('M-10 457 Q180 420 410 456 L410 530 L-10 530Z');for(let i=0;i<10;i++){const x=15+i*43+(index%2)*10,y=450-(i%3)*17;group.appendChild(path('M'+(x-18)+' '+y+' L'+x+' '+(y-82-(i%3)*14)+' L'+(x+18)+' '+y+' Z',c))}}
+if(item.kind==='waves'){p('M-15 390 Q50 370 110 390 T235 390 T410 390 L410 530 L-15 530Z');for(let j=0;j<3;j++)group.appendChild(path('M0 '+(410+j*25)+' Q70 '+(390+j*25)+' 135 '+(410+j*25)+' T275 '+(410+j*25)+' T420 '+(410+j*25),'none')).setAttribute('stroke','#ffffff55')}
+if(item.kind==='cloud'){for(let i=0;i<4;i++){const x=30+i*105,y=100+(i%2)*75;group.appendChild(el('ellipse',{cx:x,cy:y,rx:48,ry:17,fill:c}))}}
+if(item.kind==='stars'){for(let i=0;i<22;i++){const x=15+(i*83%375),y=20+(i*47%225),r=2+(i%3);group.appendChild(el('circle',{cx:x,cy:y,r,fill:c}))}}
+group.setAttribute('transform','translate(0 '+offset+')');
+if(index===selected){const mark=el('rect',{x:3,y:3,width:394,height:494,fill:'none',stroke:'#ffffff', 'stroke-dasharray':'7 8','stroke-width':2,'pointer-events':'none'});group.appendChild(mark)}
+group.addEventListener('click',()=>{selected=index;sync();render()});return group}
+function render(){svg.replaceChildren();const colors=schemes[state.theme];const defs=el('defs'),grad=el('linearGradient',{id:'sky',x1:'0',y1:'0',x2:'0',y2:'1'});grad.append(el('stop',{offset:'0%','stop-color':colors[0]}),el('stop',{offset:'100%','stop-color':colors[1]}));defs.appendChild(grad);svg.appendChild(defs);svg.appendChild(el('rect',{width:400,height:500,fill:'url(#sky)'}));svg.appendChild(el('circle',{cx:300,cy:110,r:47,fill:'#ffebcb',opacity:.65}));state.layers.forEach((l,i)=>svg.appendChild(geometry(l,i)))}
+function sync(){let item=state.layers[selected];document.getElementById('depth').disabled=!item;document.getElementById('color').disabled=!item;if(item){document.getElementById('depth').value=item.depth;document.getElementById('color').value=item.color}document.getElementById('theme').value=state.theme;notify(item?'Selected '+item.kind:'Tap a shape to edit it')}
+document.querySelectorAll('[data-kind]').forEach(b=>b.onclick=()=>{snapshot();const palette=schemes[state.theme];state.layers.push({kind:b.dataset.kind,color:palette[Math.min(2+state.layers.length%3,4)],depth:5});selected=state.layers.length-1;save();sync();render()});
+document.getElementById('theme').onchange=e=>{snapshot();state.theme=e.target.value;save();render()};
+for(const [id,prop,transform]of [['depth','depth',Number],['color','color',String]])document.getElementById(id).oninput=e=>{if(selected<0)return;state.layers[selected][prop]=transform(e.target.value);save();render()};
+for(const [id,fn]of [['back',()=>{if(selected>0){const l=state.layers.splice(selected,1)[0];state.layers.splice(--selected,0,l)}}],['forward',()=>{if(selected<state.layers.length-1){const l=state.layers.splice(selected,1)[0];state.layers.splice(++selected,0,l)}}],['remove',()=>{if(selected>=0){state.layers.splice(selected,1);selected=-1}}]])document.getElementById(id).onclick=()=>{snapshot();fn();save();sync();render()};
+document.getElementById('undo').onclick=()=>{if(!history.length)return;state=JSON.parse(history.pop());selected=-1;save();sync();render()};
+document.getElementById('reset').onclick=()=>{if(!confirm('Start a new scene? Your current layers will be replaced.'))return;snapshot();state={theme:'sunset',layers:[]};selected=-1;save();sync();render()};
+document.getElementById('export').onclick=()=>{const copy=svg.cloneNode(true);copy.querySelectorAll('[data-index]').forEach(e=>e.querySelectorAll('rect[stroke="#ffffff"]').forEach(x=>x.remove()));copy.setAttribute('xmlns',ns);const source=new XMLSerializer().serializeToString(copy),blob=new Blob([source],{type:'image/svg+xml;charset=utf-8'}),url=URL.createObjectURL(blob),img=new Image();img.onload=()=>{const canvas=document.createElement('canvas');canvas.width=1200;canvas.height=1500;const ctx=canvas.getContext('2d');ctx.drawImage(img,0,0,1200,1500);URL.revokeObjectURL(url);const a=document.createElement('a');a.href=canvas.toDataURL('image/png');a.download='little-layers.png';a.click()};img.onerror=()=>{notify('Export failed');URL.revokeObjectURL(url)};img.src=url};
+try{const x=JSON.parse(localStorage.getItem(storage));if(x&&schemes[x.theme]&&Array.isArray(x.layers)){state={theme:x.theme,layers:x.layers.filter(y=>y&&['hill','mountain','forest','waves','cloud','stars'].includes(y.kind)&&/^#[0-9a-f]{6}$/i.test(y.color)&&Number.isFinite(y.depth)).slice(0,60)}}}catch(e){}
+if(!state.layers.length){state.layers=[{kind:'mountain',color:'#978c9e',depth:8},{kind:'hill',color:'#6e9d99',depth:6},{kind:'forest',color:'#345e66',depth:3}];save()}
+sync();render();
+})();
+</script></body></html>
