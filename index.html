@@ -37,28 +37,29 @@ function seeded(seed){let n=(Number(seed)||1)>>>0;return()=>{n=(Math.imul(n,1664
 function proceduralRange(g,item,index,c,p){
  const rand=seeded(item.seed),kind=item.kind,v=Number(item.variation)||0;
  if(kind==='mountain'){
-  const peaks=[];let x=-55;let y=415;const vertices=[[-55,455]];
-  while(x<480){x+=55+rand()*80;const summit=178+rand()*143+(v===3?42:0)-(v===2?25:0);vertices.push([x,summit]);peaks.push({x,y:summit});if(x<460){x+=25+rand()*45;vertices.push([x,330+rand()*60])}}
-  vertices.push([510,455]);
-  p('M'+vertices.map(([a,b])=>a+' '+b).join(' L')+' L510 540 H-55Z');
+  const peaks=[];let x=-260;const vertices=[[-260,455]];
+  while(x<660){x+=55+rand()*80;const summit=178+rand()*143+(v===3?42:0)-(v===2?25:0);vertices.push([x,summit]);peaks.push({x,y:summit});if(x<640){x+=25+rand()*45;vertices.push([x,330+rand()*60])}}
+  vertices.push([680,455]);
+  p('M'+vertices.map(([a,b])=>a+' '+b).join(' L')+' L680 540 H-260Z');
   for(let i=0;i<vertices.length;i++){const pt=vertices[i];if(!peaks.some(k=>k.x===pt[0]))continue;const prev=vertices[i-1],next=vertices[i+1];if(!prev||!next)continue;const t=.24;const left=[pt[0]+(prev[0]-pt[0])*t,pt[1]+(prev[1]-pt[1])*t],right=[pt[0]+(next[0]-pt[0])*t,pt[1]+(next[1]-pt[1])*t];p(`M${left[0]} ${left[1]}L${pt[0]} ${pt[1]}L${right[0]} ${right[1]}L${pt[0]+3} ${pt[1]+(right[1]-pt[1])*.63}L${pt[0]-5} ${pt[1]+(left[1]-pt[1])*.72}Z`,shade(item.color,58))}
   return true
  }
- if(kind==='hill'){let d='M-35 420';for(let x=-35;x<470;x+=35){const next=x+35;const y=310+rand()*95+(v===3?25:0);d+=` Q${x+18} ${y-28-rand()*22} ${next} ${y}`}p(d+' L480 550 H-35Z');return true}
+ if(kind==='hill'){let d='M-260 420';for(let x=-260;x<670;x+=35){const next=x+35;const y=310+rand()*95+(v===3?25:0);d+=` Q${x+18} ${y-28-rand()*22} ${next} ${y}`}p(d+' L690 550 H-260Z');return true}
  if(kind==='forest'){
-  p('M-25 465 Q160 418 430 453 V540 H-25Z');const count=8+Math.floor(rand()*8)+(v===1?5:0);
-  for(let i=0;i<count;i++){const x=-15+i*(445/count)+rand()*12,base=440+rand()*24,h=60+rand()*82+(v===2?30:0),top=base-h,width=14+rand()*13;g.appendChild(el('path',{d:`M${x-3} ${base-h*.55}H${x+3}V${base+18}H${x-3}Z`,fill:shade(item.color,-55)}));
+  p('M-260 465 Q-40 422 160 450 Q400 418 680 456 V540 H-260Z');const count=22+Math.floor(rand()*10)+(v===1?8:0);
+  for(let i=0;i<count;i++){const x=-255+i*(930/count)+rand()*12,base=440+rand()*24,h=60+rand()*82+(v===2?30:0),top=base-h,width=14+rand()*13;g.appendChild(el('path',{d:`M${x-3} ${base-h*.55}H${x+3}V${base+18}H${x-3}Z`,fill:shade(item.color,-55)}));
   if(v===3)p(`M${x-width} ${base-8}Q${x-width*1.3} ${top+16} ${x} ${top}Q${x+width*1.3} ${top+16} ${x+width} ${base-8}Z`);
   else p(`M${x} ${top}L${x-width*.68} ${top+h*.5}H${x-width*.43}L${x-width} ${base-9}H${x+width}L${x+width*.43} ${top+h*.5}H${x+width*.68}Z`);
   g.appendChild(el('path',{d:`M${x} ${base-10}V${base+18}`,stroke:shade(item.color,-60),'stroke-width':5}))}
   return true
  }
  if(kind==='cloud'){const count=2+Math.floor(rand()*4)+(v===3?1:0);for(let i=0;i<count;i++){const x=25+i*380/count+rand()*30,y=72+rand()*120,k=.9+rand()*.55,cloud=el('g',{transform:`translate(${x} ${y}) scale(${k})`},g);cloud.appendChild(path('M-54 18 C-73 12 -65 -12 -43 -16 C-41 -37 -15 -43 0 -29 C15 -52 45 -35 47 -17 C72 -18 80 8 59 19 Q0 31 -54 18Z',c))}return true}
- if(kind==='waves'){const amp=9+rand()*26;let d='M-35 370';for(let x=-35;x<480;x+=48){d+=` Q${x+24} ${370-amp-rand()*13} ${x+48} ${370+rand()*10}`}p(d+' V540 H-35Z');for(let j=0;j<4;j++){const y=398+j*30;g.appendChild(el('path',{d:`M-30 ${y}Q50 ${y-amp*.7} 125 ${y}T285 ${y}T445 ${y}`,stroke:shade(item.color,34),'stroke-width':1.8,fill:'none'}))}return true}
+ if(kind==='waves'){const amp=9+rand()*26;let d='M-260 370';for(let x=-260;x<670;x+=48){d+=` Q${x+24} ${370-amp-rand()*13} ${x+48} ${370+rand()*10}`}p(d+' V540 H-260Z');for(let j=0;j<4;j++){const y=398+j*30;g.appendChild(el('path',{d:`M-260 ${y}Q-180 ${y-amp*.7} -100 ${y}T60 ${y}T220 ${y}T380 ${y}T540 ${y}T700 ${y}`,stroke:shade(item.color,34),'stroke-width':1.8,fill:'none'}))}return true}
  if(kind==='stars'){for(let i=0,n=20+Math.floor(rand()*50);i<n;i++){const x=rand()*400,y=rand()*260,r=1+rand()*3;g.appendChild(el('circle',{cx:x,cy:y,r,fill:c}))}return true}
- if(kind==='fog'){for(let i=0,n=3+Math.floor(rand()*5);i<n;i++){const y=110+i*330/n+rand()*20,h=14+rand()*24;g.appendChild(el('path',{d:`M-30 ${y}Q70 ${y-h} 160 ${y}T420 ${y}V${y+h}Q280 ${y+h+15} 160 ${y+h}T-30 ${y+h}Z`,fill:c,opacity:.2+rand()*.25}))}return true}
+ if(kind==='fog'){for(let i=0,n=3+Math.floor(rand()*5);i<n;i++){const y=110+i*330/n+rand()*20,h=14+rand()*24;g.appendChild(el('path',{d:`M-260 ${y}Q-140 ${y-h} -20 ${y}T220 ${y}T460 ${y}T700 ${y}V${y+h}Q460 ${y+h+15} 220 ${y+h}T-260 ${y+h}Z`,fill:c,opacity:.2+rand()*.25}))}return true}
  return false
 }
+function ensureWideSources(){state.layers.forEach((l,i)=>{if(['hill','mountain','forest','waves','fog'].includes(l.kind)&&!Number.isFinite(l.seed)){l.seed=7919+i*104729}})}
 function silhouette(g,item,index){const kind=item.kind,v=Number(item.variation)||0,c=item.gradient&&item.gradient!=='flat'?'url(#layergrad'+index+')':item.color;
 const p=(d,fill=c)=>g.appendChild(path(d,fill));
 if(Number.isFinite(item.seed)&&proceduralRange(g,item,index,c,p))return;
@@ -83,7 +84,7 @@ function geometry(item,index){
  const vertical=Number.isFinite(Number(item.height))?Number(item.height):0;
  // Isolated objects must keep their aspect ratio; terrain can overscan horizontally.
  const scenic=['hill','mountain','forest','waves','fog'].includes(item.kind);
- const sx=(scenic?1.75:1)*size,sy=(scenic?.95:1)*size;
+ const sx=size,sy=size; // Wide scenery is generated geometrically, not distorted.
  const art=el('g',{transform:'translate(200 250) scale('+sx+' '+sy+') translate(-200 -250)'},group);
  art.setAttribute('data-default-lift',String(defaultLift));
  group.setAttribute('data-height',String(vertical));
@@ -158,10 +159,10 @@ document.getElementById('motion').onclick=()=>{motion=!motion;const b=document.g
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&motion)document.getElementById('motion').click()});
 document.getElementById('project-save').onclick=()=>{const data=JSON.stringify({format:'LittleLayers',version:1,state},null,2),url=URL.createObjectURL(new Blob([data],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='little-layers-project.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
 document.getElementById('project-open').onclick=()=>document.getElementById('project-file').click();
-document.getElementById('project-file').onchange=async e=>{const file=e.target.files[0];e.target.value='';if(!file)return;try{if(file.size>3e6)throw Error('File too large');const data=JSON.parse(await file.text());if(data.format!=='LittleLayers'||!data.state||!schemes[data.state.theme]||!Array.isArray(data.state.layers)||data.state.layers.length>100)throw Error('Invalid file');snapshot();state={theme:data.state.theme,layers:data.state.layers.filter(l=>l&&['hill','mountain','forest','waves','cloud','stars','fog'].includes(l.kind)&&/^#[0-9a-f]{6}$/i.test(l.color)&&Number.isFinite(l.depth)).map(l=>({...l,x:Number.isFinite(l.x)?l.x:0,y:Number.isFinite(l.y)?l.y:0}))};selected=-1;save();sync();render();notify('Project imported')}catch(err){notify('Could not open project')}};
+document.getElementById('project-file').onchange=async e=>{const file=e.target.files[0];e.target.value='';if(!file)return;try{if(file.size>3e6)throw Error('File too large');const data=JSON.parse(await file.text());if(data.format!=='LittleLayers'||!data.state||!schemes[data.state.theme]||!Array.isArray(data.state.layers)||data.state.layers.length>100)throw Error('Invalid file');snapshot();state={theme:data.state.theme,layers:data.state.layers.filter(l=>l&&['hill','mountain','forest','waves','cloud','stars','fog'].includes(l.kind)&&/^#[0-9a-f]{6}$/i.test(l.color)&&Number.isFinite(l.depth)).map(l=>({...l,x:Number.isFinite(l.x)?l.x:0,y:Number.isFinite(l.y)?l.y:0}))};selected=-1;ensureWideSources();save();sync();render();notify('Project imported')}catch(err){notify('Could not open project')}};
 document.getElementById('export').onclick=()=>{const copy=svg.cloneNode(true);copy.querySelectorAll('[data-index]').forEach(e=>e.querySelectorAll('rect[stroke="#ffffff"]').forEach(x=>x.remove()));copy.setAttribute('xmlns',ns);const source=new XMLSerializer().serializeToString(copy),blob=new Blob([source],{type:'image/svg+xml;charset=utf-8'}),url=URL.createObjectURL(blob),img=new Image();img.onload=()=>{const canvas=document.createElement('canvas');canvas.width=1200;canvas.height=1500;const ctx=canvas.getContext('2d');ctx.drawImage(img,0,0,1200,1500);URL.revokeObjectURL(url);const a=document.createElement('a');a.href=canvas.toDataURL('image/png');a.download='little-layers.png';a.click()};img.onerror=()=>{notify('Export failed');URL.revokeObjectURL(url)};img.src=url};
 try{const x=JSON.parse(localStorage.getItem(storage));if(x&&schemes[x.theme]&&Array.isArray(x.layers)){state={theme:x.theme,layers:x.layers.filter(y=>y&&['hill','mountain','forest','waves','cloud','stars','fog'].includes(y.kind)&&/^#[0-9a-f]{6}$/i.test(y.color)&&Number.isFinite(y.depth)).slice(0,60)}}}catch(e){}
 if(!state.layers.length){state.layers=[{kind:'mountain',color:'#978c9e',depth:8},{kind:'hill',color:'#6e9d99',depth:6},{kind:'forest',color:'#345e66',depth:3}];save()}
-sync();render();
+ensureWideSources();save();sync();render();
 })();
 </script></body></html>
