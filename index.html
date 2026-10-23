@@ -83,6 +83,20 @@ function geometry(item,index){
  if(item.kind!=='fog'){
   paper.setAttribute('data-edge',item.edge||'cut');
   paper.setAttribute('data-texture',item.texture||'card');
+  // All materials are normal SVG shapes, never a turbulence/filter chain.
+  // Clip paper grain and subtle edge ink to the actual layer silhouette.
+  const tex=item.texture||'card',edge=item.edge||'cut';
+  if(tex!=='none'){
+   const clipId='paper-clip-'+index,clip=el('clipPath',{id:clipId,clipPathUnits:'userSpaceOnUse'});
+   Array.from(paper.children).forEach(child=>{const copy=child.cloneNode(true);copy.removeAttribute('stroke');copy.removeAttribute('stroke-width');copy.setAttribute('fill','#fff');clip.appendChild(copy)});
+   svg.querySelector('defs').appendChild(clip);
+   const patternId='grain-'+tex,overlay=el('rect',{x:-100,y:-100,width:600,height:800,fill:'url(#'+patternId+')','clip-path':'url(#'+clipId+')','pointer-events':'none'},paper);
+   overlay.setAttribute('opacity',tex==='fiber'?.45:tex==='grain'?.25:.15);
+  }
+  if(edge!=='cut'){
+   const paths=Array.from(paper.querySelectorAll('path')).filter(n=>n.getAttribute('fill')!=='none');
+   paths.forEach(pathNode=>{const contour=pathNode.cloneNode(false);contour.setAttribute('fill','none');contour.setAttribute('stroke',shade(item.color,edge==='torn'?46:25));contour.setAttribute('stroke-width',edge==='torn'?2.6:1.6);contour.setAttribute('stroke-dasharray',edge==='torn'?'1 3':'3 5');contour.setAttribute('opacity','.55');contour.setAttribute('pointer-events','none');paper.appendChild(contour)})
+  }
   // Offset a dark duplicate instead of using device-sensitive SVG filters.
   const shadow=paper.cloneNode(true),angle=(Number(state.lightAngle)||0)*Math.PI/180,distance=Math.max(0,Number(state.shadowDistance)||0)*(0.35+depth*.095);
   shadow.setAttribute('transform','translate('+(Math.sin(angle)*distance)+' '+(Math.cos(angle)*distance)+')');
@@ -95,6 +109,11 @@ function geometry(item,index){
  group.addEventListener('click',()=>{selected=index;sync();render()});return group
 }
 function render(){svg.replaceChildren();const colors=schemes[state.theme];const defs=el('defs'),grad=el('linearGradient',{id:'sky',x1:'0',y1:'0',x2:'0',y2:'1'});grad.append(el('stop',{offset:'0%','stop-color':colors[0]}),el('stop',{offset:'100%','stop-color':colors[1]}));defs.appendChild(grad);const shadow=el('filter',{id:'shadow',x:'-20%',y:'-20%',width:'140%',height:'140%'});shadow.appendChild(el('feDropShadow',{dx:0,dy:4,stdDeviation:4,'flood-color':'#101429','flood-opacity':'.48'}));defs.appendChild(shadow);
+for(const [name,step] of [['card',19],['fiber',11],['grain',7]]){
+ const pattern=el('pattern',{id:'grain-'+name,patternUnits:'userSpaceOnUse',width:step,height:step},defs);
+ if(name==='fiber'){el('path',{d:'M0 6 l7 -3 M4 10 l5 -2',stroke:'#ffffff','stroke-width':'.8',opacity:'.55'},pattern)}
+ else{el('circle',{cx:step*.28,cy:step*.4,r:name==='grain'?.8:1.2,fill:'#fff',opacity:'.52'},pattern);el('circle',{cx:step*.68,cy:step*.76,r:'.7',fill:'#101527',opacity:'.4'},pattern)}
+}
 // Shared procedural paper surfaces and edge distortions. Fog deliberately stays untextured.
 for(const edge of ['cut','torn','deckle'])for(const texture of ['card','fiber','grain','none']){
  const filter=el('filter',{id:'paper-'+edge+'-'+texture,x:'-12%',y:'-12%',width:'124%',height:'124%','color-interpolation-filters':'sRGB'});
