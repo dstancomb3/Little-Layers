@@ -53,7 +53,7 @@ function proceduralRange(g,item,index,c,p){
   g.appendChild(el('path',{d:`M${x} ${base-10}V${base+18}`,stroke:shade(item.color,-60),'stroke-width':5}))}
   return true
  }
- if(kind==='cloud'){const count=2+Math.floor(rand()*4)+(v===3?1:0);for(let i=0;i<count;i++){const x=25+i*380/count+rand()*38,y=65+rand()*135,k=.6+rand()*.65,cloud=el('g',{transform:`translate(${x} ${y}) scale(${k})`},g);cloud.appendChild(path('M-54 18 C-73 12 -65 -12 -43 -16 C-41 -37 -15 -43 0 -29 C15 -52 45 -35 47 -17 C72 -18 80 8 59 19 Q0 31 -54 18Z',c))}return true}
+ if(kind==='cloud'){const count=2+Math.floor(rand()*4)+(v===3?1:0);for(let i=0;i<count;i++){const x=25+i*380/count+rand()*30,y=72+rand()*120,k=.9+rand()*.55,cloud=el('g',{transform:`translate(${x} ${y}) scale(${k})`},g);cloud.appendChild(path('M-54 18 C-73 12 -65 -12 -43 -16 C-41 -37 -15 -43 0 -29 C15 -52 45 -35 47 -17 C72 -18 80 8 59 19 Q0 31 -54 18Z',c))}return true}
  if(kind==='waves'){const amp=9+rand()*26;let d='M-35 370';for(let x=-35;x<480;x+=48){d+=` Q${x+24} ${370-amp-rand()*13} ${x+48} ${370+rand()*10}`}p(d+' V540 H-35Z');for(let j=0;j<4;j++){const y=398+j*30;g.appendChild(el('path',{d:`M-30 ${y}Q50 ${y-amp*.7} 125 ${y}T285 ${y}T445 ${y}`,stroke:shade(item.color,34),'stroke-width':1.8,fill:'none'}))}return true}
  if(kind==='stars'){for(let i=0,n=20+Math.floor(rand()*50);i<n;i++){const x=rand()*400,y=rand()*260,r=1+rand()*3;g.appendChild(el('circle',{cx:x,cy:y,r,fill:c}))}return true}
  if(kind==='fog'){for(let i=0,n=3+Math.floor(rand()*5);i<n;i++){const y=110+i*330/n+rand()*20,h=14+rand()*24;g.appendChild(el('path',{d:`M-30 ${y}Q70 ${y-h} 160 ${y}T420 ${y}V${y+h}Q280 ${y+h+15} 160 ${y+h}T-30 ${y+h}Z`,fill:c,opacity:.2+rand()*.25}))}return true}
@@ -81,7 +81,10 @@ function geometry(item,index){
  const size=Math.max(.55,Math.min(1.55,(Number(item.size)||100)/100));
  const defaultLift={forest:-15,hill:-42,mountain:-18,waves:-25,cloud:0,stars:0,fog:0}[item.kind]||0;
  const vertical=Number.isFinite(Number(item.height))?Number(item.height):0;
- const art=el('g',{transform:'translate(200 250) scale('+(1.75*size)+' '+(.95*size)+') translate(-200 -250)'},group);
+ // Isolated objects must keep their aspect ratio; terrain can overscan horizontally.
+ const scenic=['hill','mountain','forest','waves','fog'].includes(item.kind);
+ const sx=(scenic?1.75:1)*size,sy=(scenic?.95:1)*size;
+ const art=el('g',{transform:'translate(200 250) scale('+sx+' '+sy+') translate(-200 -250)'},group);
  art.setAttribute('data-default-lift',String(defaultLift));
  group.setAttribute('data-height',String(vertical));
  const paper=el('g',{},art);silhouette(paper,item,index);
