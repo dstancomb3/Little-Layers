@@ -49,9 +49,11 @@ if(kind==='stars'){const count=[24,46,17,67][v];for(let i=0;i<count;i++){const x
 if(kind==='fog'){const stripes=[3,5,7,4][v];for(let i=0;i<stripes;i++){const y=160+i*(v===2?45:63),h=26+(i%3)*12;const d=`M-45 ${y}Q30 ${y-h} 100 ${y} T245 ${y} T430 ${y}L430 ${y+h}Q330 ${y+h+12} 235 ${y+h} T30 ${y+h}L-45 ${y+h}Z`;g.appendChild(el('path',{d,fill:c,opacity: v===3?.15:.3+(i%3)*.07}))}}}
 function geometry(item,index){const group=el('g',{'data-index':index,style:'cursor:grab'}),depth=item.depth,offset=(10-depth)*2;
 const paper=el('g',{},group);silhouette(paper,item,index);
-if(item.kind!=='fog'){const mode=['cut','torn','deckle'].includes(item.edge)?item.edge:'cut',grain=['card','fiber','grain','none'].includes(item.texture)?item.texture:'card';paper.setAttribute('filter','url(#paper-'+mode+'-'+grain+')')}
+// SVG turbulence and nested filter pipelines can erase the source graphic on mobile GPUs.
+// Render geometry directly; retain edge/texture settings in project data for safe rendering later.
+if(item.kind!=='fog'){paper.setAttribute('data-edge',item.edge||'cut');paper.setAttribute('data-texture',item.texture||'card')}
 
-group.setAttribute('transform','translate('+((item.x||0)+(motion?Math.sin(phase+index)*item.depth*.7:0))+' '+((item.y||0)+offset)+')');group.setAttribute('filter',item.kind==='fog'?'none':'url(#shadow)');
+group.setAttribute('transform','translate('+((item.x||0)+(motion?Math.sin(phase+index)*item.depth*.7:0))+' '+((item.y||0)+offset)+')');// Avoid nested SVG filters until phone rendering is verified.
 if(index===selected){group.appendChild(el('rect',{x:3,y:3,width:394,height:494,fill:'none',stroke:'#ffffff','stroke-dasharray':'7 8','stroke-width':2,'pointer-events':'none'}))}
 group.addEventListener('click',()=>{selected=index;sync();render()});return group}
 function render(){svg.replaceChildren();const colors=schemes[state.theme];const defs=el('defs'),grad=el('linearGradient',{id:'sky',x1:'0',y1:'0',x2:'0',y2:'1'});grad.append(el('stop',{offset:'0%','stop-color':colors[0]}),el('stop',{offset:'100%','stop-color':colors[1]}));defs.appendChild(grad);const shadow=el('filter',{id:'shadow',x:'-20%',y:'-20%',width:'140%',height:'140%'});shadow.appendChild(el('feDropShadow',{dx:0,dy:4,stdDeviation:4,'flood-color':'#101429','flood-opacity':'.48'}));defs.appendChild(shadow);
