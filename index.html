@@ -79,7 +79,7 @@ function geometry(item,index){
  // Extend the source horizontally, but preserve its vertical proportions.
  // Each layer can be resized and raised independently without exposing side edges.
  const size=Math.max(.55,Math.min(1.55,(Number(item.size)||100)/100));
- const defaultLift={forest:-85,hill:-42,mountain:-18,waves:-25,cloud:0,stars:0,fog:0}[item.kind]||0;
+ const defaultLift={forest:-15,hill:-42,mountain:-18,waves:-25,cloud:0,stars:0,fog:0}[item.kind]||0;
  const vertical=Number.isFinite(Number(item.height))?Number(item.height):0;
  const art=el('g',{transform:'translate(200 250) scale('+(1.75*size)+' '+(.95*size)+') translate(-200 -250)'},group);
  art.setAttribute('data-default-lift',String(defaultLift));
