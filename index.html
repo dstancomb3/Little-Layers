@@ -30,7 +30,7 @@ let state={theme:'sunset',layers:[]},selected=-1,history=[],drag=null,motion=fal
 function notify(t){document.getElementById('toast').textContent=t}
 function save(){try{localStorage.setItem(storage,JSON.stringify(state))}catch(e){notify('Storage unavailable; export PNG to keep your art.')}}
 function snapshot(){history.push(JSON.stringify(state));if(history.length>30)history.shift()}
-function el(tag,props={}){const e=document.createElementNS(ns,tag);for(const [k,v]of Object.entries(props))e.setAttribute(k,String(v));return e}
+function el(tag,props={},parent=null){const e=document.createElementNS(ns,tag);for(const [k,v]of Object.entries(props))e.setAttribute(k,String(v));if(parent)parent.appendChild(e);return e}
 function path(d,fill){return el('path',{d,fill})}
 function shade(hex,amount){const v=parseInt(hex.slice(1),16);return '#'+[16,8,0].map(shift=>Math.max(0,Math.min(255,Math.round(((v>>shift)&255)+amount))).toString(16).padStart(2,'0')).join('')}
 function silhouette(g,item,index){const kind=item.kind,v=Number(item.variation)||0,c=item.gradient&&item.gradient!=='flat'?'url(#layergrad'+index+')':item.color;
