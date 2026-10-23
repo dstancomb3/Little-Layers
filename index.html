@@ -49,7 +49,7 @@ if(kind==='stars'){const count=[24,46,17,67][v];for(let i=0;i<count;i++){const x
 if(kind==='fog'){const stripes=[3,5,7,4][v];for(let i=0;i<stripes;i++){const y=160+i*(v===2?45:63),h=26+(i%3)*12;const d=`M-45 ${y}Q30 ${y-h} 100 ${y} T245 ${y} T430 ${y}L430 ${y+h}Q330 ${y+h+12} 235 ${y+h} T30 ${y+h}L-45 ${y+h}Z`;g.appendChild(el('path',{d,fill:c,opacity: v===3?.15:.3+(i%3)*.07}))}}}
 function geometry(item,index){const group=el('g',{'data-index':index,style:'cursor:grab'}),depth=item.depth,offset=(10-depth)*2;
 const paper=el('g',{},group);silhouette(paper,item,index);
-if(item.kind!=='fog'&&item.kind!=='cloud'){const mode=['cut','torn','deckle'].includes(item.edge)?item.edge:'cut',grain=['card','fiber','grain','none'].includes(item.texture)?item.texture:'card';paper.setAttribute('filter','url(#paper-'+mode+'-'+grain+')')}
+if(item.kind!=='fog'){const mode=['cut','torn','deckle'].includes(item.edge)?item.edge:'cut',grain=['card','fiber','grain','none'].includes(item.texture)?item.texture:'card';paper.setAttribute('filter','url(#paper-'+mode+'-'+grain+')')}
 
 group.setAttribute('transform','translate('+((item.x||0)+(motion?Math.sin(phase+index)*item.depth*.7:0))+' '+((item.y||0)+offset)+')');group.setAttribute('filter',item.kind==='fog'?'none':'url(#shadow)');
 if(index===selected){group.appendChild(el('rect',{x:3,y:3,width:394,height:494,fill:'none',stroke:'#ffffff','stroke-dasharray':'7 8','stroke-width':2,'pointer-events':'none'}))}
@@ -70,7 +70,7 @@ for(const edge of ['cut','torn','deckle'])for(const texture of ['card','fiber','
   filter.appendChild(el('feColorMatrix',{in:'textureNoise',type:'saturate',values:0,result:'grayNoise'}));
   // Restrict texture to the actual paper silhouettes, preserving transparency.
   filter.appendChild(el('feComposite',{in:'grayNoise',in2:source,operator:'in',result:'maskedGrain'}));
-  filter.appendChild(el('feBlend',{in:source,in2:'maskedGrain',mode:'soft-light'}));
+  filter.appendChild(el('feBlend',{in:source,in2:'maskedGrain',mode:'soft-light',result:'paperResult'}));const end=el('feMerge',{},filter);end.appendChild(el('feMergeNode',{in:'paperResult'}));
  }
  defs.appendChild(filter);
 }
